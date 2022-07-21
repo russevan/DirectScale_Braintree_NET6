@@ -1,0 +1,190 @@
+﻿@model DirectScaleBraintree.Models.Merchants.Braintree.AddCardFrameViewModel
+
+@{
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+}
+
+<head>
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <!-- Braintree -->
+    <script src="https://js.braintreegateway.com/web/dropin/1.29.0/js/dropin.min.js"></script>
+
+    <!-- Load the client component. -->
+    <script>
+        $(document).ready(() => {
+            setTimeout(() => {
+                var button = document.querySelector('#submit-button');
+                braintree.dropin.create({
+                    authorization: '@Model.BraintreeTokenizationKey',
+                    container: '#dropin-container',
+        @{
+            if (Model.EnableDropInPayPal)
+            {
+                    <text>
+                                paypal: { flow: 'vault' },
+                    </text>
+            }
+            if (Model.EnableDropInPayPalCredit)
+            {
+                    <text>
+                                paypalCredit: { flow: 'vault' },
+                    </text>
+            }
+                @if (Model.EnableDropInVenmo)
+            {
+                    <text>
+                                venmo: {},
+                    </text>
+            }
+                @if (Model.EnableDropInApplePay)
+            {
+                    <text>
+                                applePay: {
+                                displayName: 'My Store (Needs Config for Apple Pay to work)',
+                                paymentRequest: {
+                                    total: {
+                                        label: 'My Store',
+                                        amount: '19.99'
+                                    },
+                                    // Braintree recommends collecting billing address information, at minimum
+                                    // billing postal code, and passing that billing postal code with all
+                                    // Apple Pay transactions as a best practice.
+                                    requiredBillingContactFields: ['postalAddress']
+                                }
+                            },
+                    </text>
+            }
+                @if (Model.EnableDropInGooglePay)
+            {
+                    <text>
+                                googlePay: {
+                                googlePayVersion: 2,
+                                merchantId: '@Model.GooglePayMerchantId',
+                                transactionInfo: {{
+                                totalPriceStatus: 'FINAL',
+                                totalPrice: '123.45',
+                                currencyCode: 'USD'
+                            },
+                                allowedPaymentMethods: [{
+                                    type: 'CARD',
+                                    parameters: {
+                                        // Braintree recommends collecting and passing billing address information with all Google Pay transactions as a best practice.
+                                        billingAddressRequired: true,
+                                        billingAddressParameters: {
+                                            format: 'FULL'
+                                        }
+                                    }
+                                }]
+                        },
+                    </text>
+            }
+        }
+                dataCollector: {},
+                locale: 'en_US'
+                    }, function(createErr, instance) {
+            button.addEventListener('click', () => {
+                instance.requestPaymentMethod(function(err, payload) {
+                    SavePayment(payload, instance, button);
+                });
+            });
+            if (instance.isPaymentMethodRequestable()) {
+                button.style.display = 'block';
+            }
+            instance.on('paymentMethodRequestable', (event) => {
+                button.style.display = 'block';
+            });
+            instance.on('noPaymentMethodRequestable', (event) => {
+                button.style.display = 'none';
+            });
+        });
+                }, 1000);
+            });
+
+        // Maps data from Disco response to generic SavePayment request.
+        function MapToDSPayment(payload) {
+            var data = {};
+            data.token = payload.PaymentToken;
+            switch (payload.PaymentType) { // The Braintree response includes the type of payment tokenized.
+                case 'CreditCard':
+                    data.type = payload.CardType;
+                    data.expireMonth = payload.ExpireMonth;
+                    data.expireYear = payload.ExpireYear;
+                    data.last4 = payload.LastFour;
+                    break;
+                case 'PayPalAccount':
+                    data.type = 'PayPal'
+                    data.expireMonth = '01';
+                    data.expireYear = '2099';
+                    data.last4 = 'PayPal';
+                    break;
+                case 'VenmoAccount':
+                    data.type = 'Venmo'
+                    data.expireMonth = '01';
+                    data.expireYear = '2099';
+                    data.last4 = 'Venmo';
+                    break;
+                default:
+                    alert('Unsupported card type: ' + payload.PaymentType);
+            }
+            return data;
+        }
+        function SavePayment(payload, dropInInstance, button) {
+            button.style.display = 'none';
+            var outData = {};
+            var payData = {
+                DiscoMerchantId: { MerchantInfo.Id },
+                PayerId: '@Model.PayorId',
+                PaymentNonce: payload.nonce,
+                ExpireMonth: payload.details.expirationMonth,
+                ExpireYear: payload.details.expirationYear,
+                PaymentType: payload.type,
+                CardType: payload.details.cardType,
+                CardHolderName: payload.details.cardHolderName,
+                LastFour: payload.details.lastFour,
+                DeviceData: payload.deviceData
+            };
+            $.ajax({
+                url: '/Command/ClientAPI/braintree/savepayment',
+                type: 'POST',
+                data: JSON.stringify(payData),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: (r) => {
+                    if (r.PaymentToken) {
+                        outData = MapToDSPayment(r);
+                        dropInInstance.clearSelectedPaymentMethod();
+                        button.style.display = 'none';
+                        DS_SavePaymentMethod(outData);
+                    }
+                    else {
+                        if (r.IsError) {
+                            //alert('Error Saving Card: ' + r.ErrorMessage);
+                            DS_AddPaymentError(r.ErrorMessage, r);
+                        } else {
+                            //alert('An error occurred, please try again.');
+                            DS_AddPaymentError('No token was generated. Please try again.', r);
+                        }
+                    }
+                },
+                error: (r) => {
+                    DS_AddPaymentError('Error saving card.', r);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id='dropin-container'></div>
+    <div class='col-md-4 text-center'>
+        <button id='submit-button' class='btn btn-primary' style='display: none;width: 100%;'>Save Payment Method</button>
+    </div>
+    @if (!Model.IsLive)
+    {
+        <div class='alert alert-info' role='alert'>
+            Braintree Merchant Sandbox: <strong><a href='https://sandbox.braintreegateway.com/' target='_blank'>@Model.BraintreeMerchantAccountId}</a></strong>
+        </div>
+    }
+</body>
