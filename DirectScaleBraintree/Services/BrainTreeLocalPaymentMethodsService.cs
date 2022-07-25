@@ -1,17 +1,17 @@
 ﻿using Braintree;
-using DirectScaleBrainTree.Services.Interfaces;
+using DirectScaleBraintree.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirectScaleBrainTree.Services
+namespace DirectScaleBraintree.Services
 {
-    public class BrainTreeLocalPaymentMethodsService : IBrainTreeLocalPaymentMethodsService
+    public class BraintreeLocalPaymentMethodsService : IBraintreeLocalPaymentMethodsService
     {
         // https://docs-prod-us-east-2.production.braintree-api.com/reference/request/transaction/refund/dotnet
-        public async Task RefundPayment(string transactionId, decimal? amount = null)
+        public async Task Refund(string transactionId, decimal? amount = null)
         {
 //            Result<Transaction> result = gateway.Transaction.Refund(transactionId, amount
 //);

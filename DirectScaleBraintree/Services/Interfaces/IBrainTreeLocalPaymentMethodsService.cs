@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirectScaleBrainTree.Services.Interfaces
+namespace DirectScaleBraintree.Services.Interfaces
 {
-    public interface IBrainTreeLocalPaymentMethodsService
+    public interface IBraintreeLocalPaymentMethodsService
     {
-        Task RefundPayment(string transactionId, decimal? amount = null);
+        Task Refund(string transactionId, decimal? amount = null);
     }
 }

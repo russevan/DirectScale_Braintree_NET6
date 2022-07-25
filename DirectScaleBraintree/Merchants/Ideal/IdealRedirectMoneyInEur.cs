@@ -1,18 +1,18 @@
 ﻿using DirectScale.Disco.Extension;
 using DirectScale.Disco.Extension.MoneyIn.Custom.Models;
-using DirectScaleBrainTree.Services.Interfaces;
+using DirectScaleBraintree.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirectScaleBrainTree.Merchants.Ideal
+namespace DirectScaleBraintree.Merchants.Ideal
 {
     public class IdealLocalPaymentMethodRedirectMoneyInEur : RedirectMoneyInMerchant
     {
-        private IBrainTreeLocalPaymentMethodsService _brainTreeLocalPaymentMethodsService;
-        public IdealLocalPaymentMethodRedirectMoneyInEur(IBrainTreeLocalPaymentMethodsService brainTreeLocalPaymentMethodsService)
+        private IBraintreeLocalPaymentMethodsService _brainTreeLocalPaymentMethodsService;
+        public IdealLocalPaymentMethodRedirectMoneyInEur(IBraintreeLocalPaymentMethodsService brainTreeLocalPaymentMethodsService)
         {
             _brainTreeLocalPaymentMethodsService = brainTreeLocalPaymentMethodsService ?? throw new ArgumentNullException(nameof(brainTreeLocalPaymentMethodsService));
         }
@@ -32,7 +32,7 @@ namespace DirectScaleBrainTree.Merchants.Ideal
 
         public async override Task<ExtendedPaymentResult> RefundPayment(string payerId, int orderNumber, string currencyCode, double paymentAmount, double refundAmount, string referenceNumber, string transactionNumber, string authorizationCode)
         {
-            await _brainTreeLocalPaymentMethodsService.RefundPayment(referenceNumber, (decimal)refundAmount);
+            await _brainTreeLocalPaymentMethodsService.Refund(referenceNumber, (decimal)refundAmount);
             throw new NotImplementedException();
         }
 

@@ -1,23 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DirectScaleBraintree.Middleware
 {
-    internal class BraintreeLPMCallBackMiddleware
+    internal class BraintreeLPMRedirectPageMiddleware
     {
-        public BraintreeLPMCallBackMiddleware(RequestDelegate next)
+
+        public BraintreeLPMRedirectPageMiddleware(RequestDelegate next)
         {
 
         }
         public async Task InvokeAsync(HttpContext context)
         {
-            // TODO: Implement Callback Logic.
+            // TODO: Implement RedirectPage.
             //var result = new
             //{
             //    Version = Assembly.GetEntryAssembly().GetName().Version
