@@ -24,7 +24,7 @@ namespace DirectScaleBraintree.Merchants.Ideal
                 AuthorizationCode = orderNumber + "_AuthCode",
                 ReferenceNumber = orderNumber + "_ReferenceNumber",
                 TransactionNumber = orderNumber + "_TransactionNumber",
-                RedirectUrl = "https://google.com"
+                RedirectUrl = "https://5826-2601-680-8100-fff0-4b7-62db-9d07-d8a7.ngrok.io" + "/Merchants/BrainTreeLPM/Redirect" // TODO: UPDATE THIS TO BE DYNAMIC
             };
 
             return await Task.FromResult(result);

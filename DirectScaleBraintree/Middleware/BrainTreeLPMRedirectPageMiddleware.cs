@@ -24,9 +24,9 @@ namespace DirectScaleBraintree.Middleware
 
             //string resultBody = JsonConvert.SerializeObject(result);
 
-            //context.Response.StatusCode = 200;
-            //context.Response.ContentType = "application/json";
-            //await context.Response.WriteAsync(resultBody, Encoding.UTF8);
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "application/html";
+            await context.Response.SendFileAsync("C:\\Code\\DirectScale_Braintree_NET6\\DirectScaleBraintree\\Pages\\DirectScaleBraintreeRedirect.html");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace DirectScaleBraintree.Middleware
         public static IApplicationBuilder UseDirectScaleBraintree(this IApplicationBuilder app)
         {
             app.Map("/api/Merchants/BrainTreeLPM/Callback", x => x.UseMiddleware<BraintreeLPMCallBackMiddleware>());
-            app.Map("/api/Merchants/BrainTreeLPM/Redirect", x => x.UseMiddleware<BraintreeLPMRedirectPageMiddleware>());
+            app.Map("/Merchants/BrainTreeLPM/Redirect", x => x.UseMiddleware<BraintreeLPMRedirectPageMiddleware>());
 
             return app;
         }
