@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Braintree;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DirectScaleBraintree.Services.Interfaces
 {
     public interface IBraintreeLocalPaymentMethodsService
     {
-        Task Refund(string transactionId, decimal? amount = null);
+        Task <Result<Transaction>> RefundTransaction(string transactionId, decimal amount);
+        Task<Result<Transaction>> CreateTransaction(TransactionRequest transactionRequest);
     }
 }

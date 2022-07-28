@@ -10,33 +10,35 @@ namespace DirectScaleBraintree.Services
 {
     public class BraintreeLocalPaymentMethodsService : IBraintreeLocalPaymentMethodsService
     {
-        // https://docs-prod-us-east-2.production.braintree-api.com/reference/request/transaction/refund/dotnet
-        public async Task Refund(string transactionId, decimal? amount = null)
+        protected readonly IBraintreeSettingsService _braintreeSettingsService;
+        public BraintreeLocalPaymentMethodsService(IBraintreeSettingsService braintreeSettingsService)
         {
-//            Result<Transaction> result = gateway.Transaction.Refund(transactionId, amount
-//);
+            _braintreeSettingsService = braintreeSettingsService ?? throw new ArgumentNullException(nameof(braintreeSettingsService));
+        }
 
-//            result.IsSuccess()
-//// true
-//Transaction refund = result.Target;
-//            refund.Type;
-//            // TransactionType.CREDIT
-//            refund.Amount;
-//            // 50.00
+        public Task<Result<Transaction>> CreateTransaction(TransactionRequest transactionRequest)
+        {
+            var gateway = new BraintreeGateway(
+                _braintreeSettingsService.Environment, 
+                _braintreeSettingsService.MerchantId, 
+                _braintreeSettingsService.PublicKey,
+                _braintreeSettingsService.PrivateKey
+                );
 
-//            Result<Transaction> result = gateway.Transaction.Refund(
-//                "a_transaction_id",
-//                10.00M
-//            );
+            return Task.FromResult(gateway.Transaction.Sale(transactionRequest));
+        }
 
-//            result.IsSuccess()
-//// true
-//Transaction refund = result.Target;
-//            refund.Type;
-//            // TransactionType.CREDIT
-//            refund.Amount;
-//            // 10.00
-            throw new NotImplementedException();
+        public Task<Result<Transaction>> RefundTransaction(string transactionId, decimal amount)
+        {
+
+            var gateway = new BraintreeGateway(
+                _braintreeSettingsService.Environment,
+                _braintreeSettingsService.MerchantId,
+                _braintreeSettingsService.PublicKey,
+                _braintreeSettingsService.PrivateKey
+                );
+
+            return Task.FromResult(gateway.Transaction.Refund(transactionId, amount));
         }
     }
 }

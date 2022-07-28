@@ -19,6 +19,7 @@ namespace DirectScaleBraintree.Middleware
         {
             // Register Classes needed
             services.AddSingleton<IBraintreeLocalPaymentMethodsService, BraintreeLocalPaymentMethodsService>();
+            services.AddSingleton<IBraintreeSettingsService, BraintreeSettingsService>();
 
             return services;
         }
@@ -26,12 +27,14 @@ namespace DirectScaleBraintree.Middleware
         {
             app.Map("/api/Merchants/BrainTreeLPM/Callback", x => x.UseMiddleware<BraintreeLPMCallBackMiddleware>());
             app.Map("/Merchants/BrainTreeLPM/Redirect", x => x.UseMiddleware<BraintreeLPMRedirectPageMiddleware>());
+            app.Map("/Merchants/BrainTreeLPM/SaveAuthorizationNumber", x => x.UseMiddleware<BraintreeLPMSaveAuthorizationNumberMiddleware>());
+            app.Map("/Merchants/BrainTreeLPM/CreateTransaction", x => x.UseMiddleware<BraintreeLPMCreateTransactionMiddleware>());
 
             return app;
         }
-        public static void AddIdealBraintreeLocalPaymentMethod(this SetupOptions setupOptions, int merchantId)
+        public static void AddBraintreeLocalPaymentMethodMerchant(this SetupOptions setupOptions, int merchantId, string name, string description, string currencyCode)
         {
-            setupOptions.AddMerchant<IdealLocalPaymentMethodRedirectMoneyInEur>(merchantId, "BrainTree iDEAL (EUR)", "iDEAL BrainTree Local Payment Method for The Netherlands", "EUR");
+            setupOptions.AddMerchant<BraintreeLocalPaymentMethodRedirectMoneyIn>(merchantId, name, description, currencyCode);
         }
     }
 }
